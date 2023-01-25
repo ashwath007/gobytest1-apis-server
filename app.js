@@ -39,7 +39,8 @@ const port = process.env.PORT || 8080;
 
 // ************************ Import all routes here **********************
 
-
+const userRoute = require("./routes/user");
+const businessRoute = require("./routes/business");
 
 // **********************************************************************
 
@@ -122,8 +123,9 @@ app.get("/", (req, res) => {
 const MOBILE = '/api/mobile';
 const WEB = '/api/web';
 
-
-
+// ?? | WEB APIs | 
+app.use(WEB, userRoute);
+app.use(WEB, businessRoute);
 
 // ***************************************************************************** 
 
