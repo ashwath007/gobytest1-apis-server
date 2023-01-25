@@ -32,8 +32,7 @@ const userSchema = new mongoose.Schema({
 
     user_id: {
         type: String,
-        unique: true,
-        required: true
+        unique: true
     },
 
     user_bni_chapter: {
@@ -54,23 +53,25 @@ const userSchema = new mongoose.Schema({
 
     user_business: {
         type: ObjectId,
-        ref: "Business",
-        required: true
+        ref: "Business"
     },
 
     user_status: {
-        type: Boolean,
-        required: true,
-        default: true
-    },
-
-    user_total_viste: {
         type: String,
         required: true
     },
 
+    user_total_viste: {
+        type: Number,
+        required: true
+    },
 
 
+    user_social_links: {
+        type: ObjectId,
+        ref: "Links",
+        required: true
+    }
 
 
 
