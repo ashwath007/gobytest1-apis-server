@@ -12,6 +12,11 @@ const userSchema = new mongoose.Schema({
         required: true
     },
 
+    user_profile_pic: {
+        type: String,
+        required: true
+    },
+
     user_fullname: {
         type: String,
         maxLength: 42,
