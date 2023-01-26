@@ -6,6 +6,7 @@ const mongoose = require('mongoose');
 const https = require('https');
 const fs = require('fs');
 const session = require('express-session');
+const router = require('express').Router();
 
 const cors = require('cors');
 const bodyParser = require('body-parser');
@@ -19,6 +20,18 @@ const corsConfig = {
     methods: ["POST", "PUT", "GET", "OPTIONS", "HEAD"]
 };
 app.use(cors(corsConfig));
+
+
+// ?? *********** Swagger API Documentation ***************
+
+
+const swaggerUi = require('swagger-ui-express');
+const swaggerDocument = require('./public/swagger.json');
+
+router.use('/docs', swaggerUi.serve);
+router.get('/docs', swaggerUi.setup(swaggerDocument));
+
+// ?? *****************************************************
 
 
 
