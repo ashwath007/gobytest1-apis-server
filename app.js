@@ -11,9 +11,11 @@ const router = require('express').Router();
 const cors = require('cors');
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
+
 // ** Middlewares
 app.use(bodyParser.json());
 app.use(cookieParser());
+app.use(express.static('./public'));
 const corsConfig = {
     origin: 'https://localhost:3000',
     credentials: true,
@@ -26,10 +28,9 @@ app.use(cors(corsConfig));
 
 
 const swaggerUi = require('swagger-ui-express');
-const swaggerDocument = require('./public/swagger.json');
+const swaggerDocument = require('./swagger.json');
 
-router.use('/docs', swaggerUi.serve);
-router.get('/docs', swaggerUi.setup(swaggerDocument));
+
 
 // ?? *****************************************************
 
@@ -139,6 +140,9 @@ const WEB = '/api/web';
 // ?? | WEB APIs | 
 app.use(WEB, userRoute);
 app.use(WEB, businessRoute);
+
+
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 // ***************************************************************************** 
 
