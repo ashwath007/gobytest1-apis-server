@@ -1,4 +1,7 @@
 const mongoose = require('mongoose');
+const { ObjectId } = mongoose.Schema;
+
+
 
 const businessSchema = new mongoose.Schema({
 
@@ -36,6 +39,19 @@ const businessSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+
+    user_profile_link: {
+        type: ObjectId,
+        ref: "Links",
+        required: true
+    },
+
+    business_category: {
+        type: String,
+        required: true
+    }
+
+
 
 
 
