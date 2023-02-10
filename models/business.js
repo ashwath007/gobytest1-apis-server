@@ -49,6 +49,11 @@ const businessSchema = new mongoose.Schema({
     business_category: {
         type: String,
         required: true
+    },
+
+    business_social_links: {
+        type: String,
+        required: true
     }
 
 
