@@ -15,6 +15,9 @@ const cors = require('cors');
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
 
+// ** UUID
+const { v4: uuidv4 } = require('uuid');
+
 // ** Middlewares
 app.use(bodyParser.json());
 app.use(cookieParser());
@@ -78,10 +81,10 @@ const businessRoute = require("./routes/business");
  */
 // ** LINK - https://nodejs.org/en/knowledge/HTTP/servers/how-to-create-a-HTTPS-server/#:~:text=To%20start%20your%20https%20server,the%20file)%20on%20the%20terminal.&text=or%20in%20your%20browser%2C%20by,to%20https%3A%2F%2Flocalhost%3A8000%20.
 
-// const options = {
-//     key: fs.readFileSync('./.cert/key.pem'),
-//     cert: fs.readFileSync('./.cert/cert.pem')
-// };
+const options = {
+    key: fs.readFileSync('./.cert/key.pem'),
+    cert: fs.readFileSync('./.cert/cert.pem')
+};
 // ?
 
 
@@ -90,7 +93,7 @@ const businessRoute = require("./routes/business");
 // ******************************************************************* DB Connection
 mongoose.set('strictQuery', true);
 mongoose
-    .connect(process.env.DATABASE_PROD, {
+    .connect(process.env.DATABASE_STAG, {
         useNewUrlParser: true,
         useUnifiedTopology: true,
     })
@@ -104,7 +107,7 @@ mongoose
 // ** Mongo DB Store configuraton for session storage
 const MongoDBStore = require('connect-mongodb-session')(session);
 var store = new MongoDBStore({
-    uri: 'mongodb+srv://goby:gobygoby@cluster0.djrk8bc.mongodb.net/?retryWrites=true&w=majority',
+    uri: 'mongodb://localhost:27017/goby-in-v1',
     collection: 'mySessions'
 });
 
@@ -151,8 +154,16 @@ app.use(session({
 app.get("/", (req, res) => {
     console.log("GET Request")
     console.log("Session ID - ", req.sessionID);
+
+    // ?? Login Auth WA
+    const login_wa_token = uuidv4();
+    res.cookie('login-temp', login_wa_token);
+    req.session.login_wa_token = login_wa_token;
+
+
     return res.send({
-        version: 'goby.in - version 1'
+        version: 'goby.in - version 1',
+        login: login_wa_token
     });
 });
 
@@ -178,13 +189,13 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 // TODO: Starting HTTPs Node Server
 // ****************************************************************** Node Server
-app.listen(port, () => {
-    Pig.server(port);
-});
+// app.listen(port, () => {
+//     Pig.server(port);
+// });
 
 // exports.app = functions.https.onRequest(app);
 
-// https.createServer(options, app)
-//     .listen(port, function() {
-//         Pig.server(port);
-//     });
+https.createServer(options, app)
+    .listen(port, function() {
+        Pig.server(port);
+    });
