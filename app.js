@@ -23,7 +23,7 @@ app.use(bodyParser.json());
 app.use(cookieParser());
 app.use(express.static('./public'));
 const corsConfig = {
-    origin: 'https://localhost:3000',
+    origin: 'https://eb9b-2409-40f4-28-ee9c-b0e9-c2ee-cfd0-d76b.in.ngrok.io',
     credentials: true,
     methods: ["POST", "PUT", "GET", "OPTIONS", "HEAD"]
 };
@@ -53,6 +53,7 @@ const Pig = require('pigcolor');
 const port = process.env.PORT || 8080;
 
 
+// ?? LoginTemp Auth DB
 
 
 
@@ -61,9 +62,13 @@ const port = process.env.PORT || 8080;
 
 const userRoute = require("./routes/user");
 const businessRoute = require("./routes/business");
+const userAuthRoute = require("./routes/userAuth");
 
 // **********************************************************************
 
+const AuthTemp = require('./models/userAuth');
+
+// **********************************************************************
 
 
 
@@ -105,6 +110,7 @@ mongoose
 
 // ?? Session Store Connection
 // ** Mongo DB Store configuraton for session storage
+const db = mongoose.connection;
 const MongoDBStore = require('connect-mongodb-session')(session);
 var store = new MongoDBStore({
     uri: 'mongodb://localhost:27017/goby-in-v1',
@@ -139,19 +145,20 @@ store.on('error', function(error) {
 
 // // ?????????????????????????????????????????????????????????????????????????????????????
 
-
+app.set("trust proxy", 1);
 app.use(session({
     secret: 'This is a secret',
     cookie: {
         maxAge: 1000 * 60 * 60 * 24 * 1 // 1 week
     },
+    proxy: true,
     store: store,
     resave: true,
     saveUninitialized: true
 }));
 
 
-app.get("/", (req, res) => {
+app.get("/login", (req, res) => {
     console.log("GET Request")
     console.log("Session ID - ", req.sessionID);
 
@@ -161,13 +168,42 @@ app.get("/", (req, res) => {
     req.session.login_wa_token = login_wa_token;
 
 
+
     return res.send({
         version: 'goby.in - version 1',
         login: login_wa_token
     });
 });
 
+app.post("/user/new/auth", (req, res) => {
+    Pig.box("New User - WA Auth");
+    if (!req.body.userPhone || !req.body.userCode || !req.body.userLoginMsg) {
+        return res.json({
+            msg: "User Data is not valid"
+        })
+    } else {
+        const userPhone = req.body.userPhone.slice(0, 12);
+        const userCode = req.body.userCode;
+        console.log("USER -> ", userPhone, userCode);
+        const newAuthTemp = new AuthTemp();
+        newAuthTemp.tempId = userCode;
+        newAuthTemp.userPhone = userPhone;
+        newAuthTemp.userSession = uuidv4();
+        newAuthTemp.save((err, authTemp) => {
+            if (err) {
+                // return res.status(400).json({
+                //     error: err
+                // })
+            }
+            return res.json({
+                authTemp: authTemp
+            })
+        });
 
+
+    }
+    console.log("New User Auth - ", req.body);
+});
 
 
 
@@ -180,6 +216,7 @@ const WEB = '/api/web';
 // ?? | WEB APIs | 
 app.use(WEB, userRoute);
 app.use(WEB, businessRoute);
+app.use(WEB, userAuthRoute);
 
 
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
