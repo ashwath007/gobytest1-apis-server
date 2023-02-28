@@ -99,7 +99,7 @@ const options = {
 // ******************************************************************* DB Connection
 mongoose.set('strictQuery', true);
 mongoose
-    .connect(process.env.DATABASE_STAG, {
+    .connect(process.env.DATABASE_PROD, {
         useNewUrlParser: true,
         useUnifiedTopology: true,
     })
@@ -114,7 +114,7 @@ mongoose
 const db = mongoose.connection;
 const MongoDBStore = require('connect-mongodb-session')(session);
 var store = new MongoDBStore({
-    uri: 'mongodb://localhost:27017/goby-in-v1',
+    uri: 'mongodb+srv://goby:gobygoby@cluster0.djrk8bc.mongodb.net/?retryWrites=true&w=majority',
     collection: 'mySessions'
 });
 
