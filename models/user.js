@@ -8,31 +8,31 @@ const userSchema = new mongoose.Schema({
     user_name: {
         type: String,
         trim: true,
-        unique: true,
-        required: true
+        unique: true
+    },
+
+    user_phone: {
+        type: String,
+        unique: true
     },
 
     user_profile_pic: {
-        type: String,
-        required: true
+        type: String
     },
 
     user_fullname: {
         type: String,
-        maxLength: 42,
-        required: true
+        maxLength: 42
     },
 
     user_whatsapp_direct: {
         type: String,
-        unique: true,
-        required: true
+        unique: true
     },
 
     user_phone_direct: {
         type: String,
-        unique: true,
-        required: true
+        unique: true
     },
 
     user_id: {
@@ -41,18 +41,15 @@ const userSchema = new mongoose.Schema({
     },
 
     user_bni_chapter: {
-        type: String,
-        required: true
+        type: String
     },
 
     user_location: {
-        type: String,
-        required: true
+        type: String
     },
 
     user_bio: {
         type: String,
-        required: true,
         maxLength: 100
     },
 
@@ -62,20 +59,17 @@ const userSchema = new mongoose.Schema({
     },
 
     user_status: {
-        type: String,
-        required: true
+        type: String
     },
 
     user_total_viste: {
-        type: Number,
-        required: true
+        type: Number
     },
 
 
     user_social_links: {
         type: ObjectId,
-        ref: "Links",
-        required: true
+        ref: "Links"
     }
 
 

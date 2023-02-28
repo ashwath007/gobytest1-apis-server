@@ -13,6 +13,11 @@ const userAuthTemp = new mongoose.Schema({
     userPhone: {
         type: String,
         unique: true
+    },
+    userProfileStatus: {
+        type: String,
+        enum: ['New User', 'Verified', 'OnBoarding-One', 'OnBoarding-Two', 'OnBoarding-Three'],
+        default: 'New User'
     }
 
 });

@@ -23,7 +23,7 @@ app.use(bodyParser.json());
 app.use(cookieParser());
 app.use(express.static('./public'));
 const corsConfig = {
-    origin: 'https://eb9b-2409-40f4-28-ee9c-b0e9-c2ee-cfd0-d76b.in.ngrok.io',
+    origin: 'https://yellow-months-rescue-157-51-199-62.loca.lt',
     credentials: true,
     methods: ["POST", "PUT", "GET", "OPTIONS", "HEAD"]
 };
@@ -67,6 +67,7 @@ const userAuthRoute = require("./routes/userAuth");
 // **********************************************************************
 
 const AuthTemp = require('./models/userAuth');
+const UserRoute = require('./models/user');
 
 // **********************************************************************
 
@@ -175,6 +176,14 @@ app.get("/login", (req, res) => {
     });
 });
 
+app.get("/", (req, res) => {
+    return res.json({
+        msg: "goby.in Version 1.1.1"
+    })
+});
+
+
+
 app.post("/user/new/auth", (req, res) => {
     Pig.box("New User - WA Auth");
     if (!req.body.userPhone || !req.body.userCode || !req.body.userLoginMsg) {
@@ -206,6 +215,40 @@ app.post("/user/new/auth", (req, res) => {
 });
 
 
+app.post("/user/new/verification", (req, res) => {
+    console.log("User Verification");
+    console.log("User Session - ", req.sessionID);
+    console.log("User Auth Token - ", req.body.userID);
+    // const newUserRoute = new UserRoute();
+    // newUserRoute.user_phone = 
+    AuthTemp.findOne({ userSession: req.body.userID }, (err, auth) => {
+
+        if (err) {
+            return res.status(400).json({
+                error: err
+            })
+        }
+        console.log("Auth - ", auth);
+        console.log("Auth Error - ", err);
+        auth.userProfileStatus = 'Verified';
+        auth.save((err, userVerification) => {
+            if (err) {
+                return res.status(400).json({
+                    error: err
+                })
+            }
+            return res.json({
+                user: userVerification,
+                redirect: true
+            })
+        });
+    });
+
+    // **  Here we can able to build user profile
+
+
+});
+
 
 
 //********************* All Route Middlewares **********************************
@@ -226,13 +269,13 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 // TODO: Starting HTTPs Node Server
 // ****************************************************************** Node Server
-// app.listen(port, () => {
-//     Pig.server(port);
-// });
+app.listen(port, () => {
+    Pig.server(port);
+});
 
 // exports.app = functions.https.onRequest(app);
 
-https.createServer(options, app)
-    .listen(port, function() {
-        Pig.server(port);
-    });
+// https.createServer(options, app)
+//     .listen(port, function() {
+//         Pig.server(port);
+//     });
