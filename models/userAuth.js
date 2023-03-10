@@ -10,7 +10,17 @@ const userAuthTemp = new mongoose.Schema({
         type: String,
         unique: true
     },
+    userName: {
+        type: String,
+        unique: true,
+        trim: true
+    },
+
     userPhone: {
+        type: String,
+        unique: true
+    },
+    userEmail: {
         type: String,
         unique: true
     },
@@ -18,6 +28,24 @@ const userAuthTemp = new mongoose.Schema({
         type: String,
         enum: ['New User', 'Verified', 'OnBoarding-One', 'OnBoarding-Two', 'OnBoarding-Three'],
         default: 'New User'
+    },
+
+    userVerifyCodeEmail: {
+        type: String,
+        unique: true,
+        trim: true,
+        required: true
+    },
+
+    userVerifyCodeWA: {
+        type: String,
+        unique: true,
+        trim: true,
+        required: true
+    },
+
+    userEmailCodeSent: {
+        type: Boolean
     }
 
 });

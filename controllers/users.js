@@ -1,11 +1,13 @@
 const Pig = require("pigcolor");
 const { v4: uuidv4 } = require('uuid');
+var nodemailer = require('nodemailer');
+const axios = require('axios');
 
 // ** User DB Imports ************
 
 const User = require("../models/user");
 const Links = require("../models/links");
-
+const AuthTemp = require("../models/userAuth");
 
 // *******************************
 
@@ -133,4 +135,118 @@ exports.getAllUsername = (req, res) => {
             userNames: usernames
         })
     });
+}
+
+
+// ?? ---------------------
+
+
+const sendEmail = (to, subject, msg, html) => {
+    var transporter = nodemailer.createTransport('smtps://help.goby.in@zohomail.in:gobygoby2023@smtp.zoho.in');
+
+    var mailOptions = {
+        from: 'help.goby.in@zohomail.in',
+        to: to,
+        subject: subject,
+        text: msg,
+        html: html
+    };
+    transporter.sendMail(mailOptions, function(error, info) {
+        if (error) {
+            console.log(error);
+            return false;
+        } else {
+            console.log('Email sent: ' + info.response);
+            return true;
+        }
+    });
+}
+
+const sendWA = (to, subject) => {
+    axios.post('https://localhost:8081/send/code', {
+            to: to,
+            subject: subject
+        }, { withCredentials: true })
+        .then(res => {
+            console.log("Response - ", res);
+            return true;
+        })
+        .catch(err => {
+            console.log("Error - ", err);
+            return false;
+        })
+}
+
+
+exports.createTempUser = (req, res) => {
+    Pig.box("CREATE: Temp User");
+    console.log(req.body);
+    console.log(req.sessionID);
+    var userCodeEmail = Math.floor(1000 + Math.random() * 9000);
+    var userCodeWA = Math.floor(1000 + Math.random() * 9000);
+    if (req.body.mode === "email") {
+        const newAuthTemp = new AuthTemp();
+        newAuthTemp.userName = req.body.userName;
+        newAuthTemp.userPhone = req.body.userPhone;
+        newAuthTemp.userEmail = req.body.userEmail;
+        newAuthTemp.tempId = uuidv4();
+        newAuthTemp.userVerifyCodeEmail = userCodeEmail
+        newAuthTemp.userVerifyCodeWA = userCodeWA;
+
+        newAuthTemp.save((err, tempUser) => {
+            var emailSubject = `User Verification Code`;
+            var emailText = `This is the verification code - ${userCodeEmail}`;
+            const sent = sendEmail(req.body.userEmail, emailSubject, emailText);
+            if (err) {
+                console.log("Error - ", err);
+                return res.status(400).json({
+                    error: err
+                });
+            }
+            console.log("Temp User - ", tempUser);
+            if (tempUser || sent) {
+                req.session.tempId = tempUser.tempId;
+                req.session.status = "not verified";
+                res.json({
+                    msg: "hi",
+                    data: tempUser,
+                    id: tempUser._id
+                })
+            }
+
+        })
+    } else if (req.body.mode === "wa") {
+        const to = req.body.userPhone;
+        const subject = req.body.userCodeWA;
+        sendWA(to, subject);
+    }
+}
+
+
+
+exports.sendCode = (req, res) => {
+    Pig.box("SEND: Code");
+}
+
+const generateUniqueCode = () => {
+    return 1
+}
+
+exports.userValidator = (req, res) => {
+    Pig.box("VALIDATE: User");
+    console.log("code", req.body.code);
+    const id = req.session.tempId
+    AuthTemp.findOne({ tempId: id }, (err, user) => {
+        console.log(user);
+        if (user.userVerifyCodeEmail === req.body.code) {
+            req.session.user = user.tempId;
+            return res.json({
+                user
+            })
+        }
+    })
+}
+
+exports.userOnboarding = (req, res) => {
+    Pig.box("USER: Onboarding")
 }

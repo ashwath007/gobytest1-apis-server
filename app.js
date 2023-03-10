@@ -23,7 +23,7 @@ app.use(bodyParser.json());
 app.use(cookieParser());
 app.use(express.static('./public'));
 const corsConfig = {
-    origin: 'https://yellow-months-rescue-157-51-199-62.loca.lt',
+    origin: '*',
     credentials: true,
     methods: ["POST", "PUT", "GET", "OPTIONS", "HEAD"]
 };
@@ -69,6 +69,11 @@ const userAuthRoute = require("./routes/userAuth");
 const AuthTemp = require('./models/userAuth');
 const UserRoute = require('./models/user');
 
+
+// ?? Email Routers
+const emailRoute = require('./routes/email/email');
+
+
 // **********************************************************************
 
 
@@ -99,7 +104,7 @@ const options = {
 // ******************************************************************* DB Connection
 mongoose.set('strictQuery', true);
 mongoose
-    .connect(process.env.DATABASE_PROD, {
+    .connect(process.env.DATABASE_STAG, {
         useNewUrlParser: true,
         useUnifiedTopology: true,
     })
@@ -114,7 +119,7 @@ mongoose
 const db = mongoose.connection;
 const MongoDBStore = require('connect-mongodb-session')(session);
 var store = new MongoDBStore({
-    uri: 'mongodb+srv://goby:gobygoby@cluster0.djrk8bc.mongodb.net/?retryWrites=true&w=majority',
+    uri: 'mongodb://localhost:27017/goby-in-v1',
     collection: 'mySessions'
 });
 
@@ -260,6 +265,7 @@ const WEB = '/api/web';
 app.use(WEB, userRoute);
 app.use(WEB, businessRoute);
 app.use(WEB, userAuthRoute);
+app.use(WEB, emailRoute);
 
 
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
@@ -269,13 +275,13 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 // TODO: Starting HTTPs Node Server
 // ****************************************************************** Node Server
-app.listen(port, () => {
-    Pig.server(port);
-});
+// app.listen(port, () => {
+//     Pig.server(port);
+// });
 
 // exports.app = functions.https.onRequest(app);
 
-// https.createServer(options, app)
-//     .listen(port, function() {
-//         Pig.server(port);
-//     });
+https.createServer(options, app)
+    .listen(port, function() {
+        Pig.server(port);
+    });
